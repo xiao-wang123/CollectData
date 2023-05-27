@@ -35,6 +35,10 @@ namespace test
             this.richTextBox1 = new System.Windows.Forms.RichTextBox();
             this.open = new System.Windows.Forms.Button();
             this.openFileDialog1 = new System.Windows.Forms.OpenFileDialog();
+            this.KCIVWriteXS = new System.Windows.Forms.Button();
+            this.statusStrip_factor = new System.Windows.Forms.StatusStrip();
+            this.toolStripStatusLabelFactor = new System.Windows.Forms.ToolStripStatusLabel();
+            this.statusStrip_factor.SuspendLayout();
             this.SuspendLayout();
             // 
             // upload
@@ -70,7 +74,7 @@ namespace test
             this.richTextBox1.Location = new System.Drawing.Point(12, 39);
             this.richTextBox1.Name = "richTextBox1";
             this.richTextBox1.ReadOnly = true;
-            this.richTextBox1.Size = new System.Drawing.Size(735, 406);
+            this.richTextBox1.Size = new System.Drawing.Size(816, 438);
             this.richTextBox1.TabIndex = 3;
             this.richTextBox1.Text = "";
             // 
@@ -86,23 +90,51 @@ namespace test
             this.open.UseVisualStyleBackColor = true;
             this.open.Click += new System.EventHandler(this.open_Click);
             // 
-            // openFileDialog1
+            // KCIVWriteXS
             // 
-            this.openFileDialog1.FileName = "openFileDialog1";
+            this.KCIVWriteXS.Location = new System.Drawing.Point(753, 12);
+            this.KCIVWriteXS.Name = "KCIVWriteXS";
+            this.KCIVWriteXS.Size = new System.Drawing.Size(75, 21);
+            this.KCIVWriteXS.TabIndex = 5;
+            this.KCIVWriteXS.Text = "系数录入";
+            this.KCIVWriteXS.UseVisualStyleBackColor = true;
+            this.KCIVWriteXS.Click += new System.EventHandler(this.KCIVWriteXS_Click);
+            // 
+            // statusStrip_factor
+            // 
+            this.statusStrip_factor.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.toolStripStatusLabelFactor});
+            this.statusStrip_factor.Location = new System.Drawing.Point(0, 485);
+            this.statusStrip_factor.Name = "statusStrip_factor";
+            this.statusStrip_factor.Size = new System.Drawing.Size(841, 22);
+            this.statusStrip_factor.TabIndex = 6;
+            this.statusStrip_factor.Text = "statusStrip1";
+            // 
+            // toolStripStatusLabelFactor
+            // 
+            this.toolStripStatusLabelFactor.Name = "toolStripStatusLabelFactor";
+            this.toolStripStatusLabelFactor.Size = new System.Drawing.Size(160, 17);
+            this.toolStripStatusLabelFactor.Text = "toolStripStatusLabelFactor";
             // 
             // Form1
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 12F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(759, 457);
+            this.ClientSize = new System.Drawing.Size(841, 507);
+            this.Controls.Add(this.statusStrip_factor);
+            this.Controls.Add(this.KCIVWriteXS);
             this.Controls.Add(this.open);
             this.Controls.Add(this.richTextBox1);
             this.Controls.Add(this.label1);
             this.Controls.Add(this.filepath);
             this.Controls.Add(this.upload);
+            this.MinimumSize = new System.Drawing.Size(857, 546);
             this.Name = "Form1";
             this.Text = "热量仪采集程序";
+            this.Load += new System.EventHandler(this.Form1_Load);
             this.Resize += new System.EventHandler(this.Form1_Resize);
+            this.statusStrip_factor.ResumeLayout(false);
+            this.statusStrip_factor.PerformLayout();
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -116,6 +148,9 @@ namespace test
         private System.Windows.Forms.RichTextBox richTextBox1;
         private System.Windows.Forms.Button open;
         private System.Windows.Forms.OpenFileDialog openFileDialog1;
+        private System.Windows.Forms.Button KCIVWriteXS;
+        private System.Windows.Forms.StatusStrip statusStrip_factor;
+        private System.Windows.Forms.ToolStripStatusLabel toolStripStatusLabelFactor;
     }
 }
 

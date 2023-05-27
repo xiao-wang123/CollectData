@@ -15,6 +15,7 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Web.Script.Serialization;
 using System.Windows.Forms;
 
 namespace test
@@ -92,11 +93,18 @@ namespace test
         public Form1()
         {
             InitializeComponent();
+
+        }
+
+        private void Form1_Load(object sender, EventArgs e)
+        {
             x = this.Width;
             y = this.Height;
             setTag(this);
+            toolStripStatusLabelFactor.Text = "当前A筒系数：" + ConfigModel.WriteXS_A.ToString() + "   当前B筒系数：" + ConfigModel.WriteXS_B.ToString();
+
         }
-        
+
         private void upload_Click(object sender, EventArgs e)
         {
             if (filepath.Text.Trim() == "")
@@ -105,9 +113,21 @@ namespace test
             }
             else
             {
-                
                 if (flag)
                 {
+                    //开始传输数据时，先确认A、B筒的系数
+                    var frm = new KCIVWriteXS();
+                    frm.StartPosition = FormStartPosition.CenterParent;
+                    if (DialogResult.OK == frm.ShowDialog())
+                    {
+                        toolStripStatusLabelFactor.Text = "当前A筒系数：" + ConfigModel.WriteXS_A.ToString() + "   当前B筒系数：" + ConfigModel.WriteXS_B.ToString();
+                    }
+                    else
+                    {
+                        return;
+                    }
+
+                    //确认系数后开始存储数据
                     AddLstMessage("开始存储数据...");
                     string filepath = this.filepath.Text;
                     //监听文件的变化
@@ -121,6 +141,7 @@ namespace test
                     watcher.EnableRaisingEvents = true;
 
                     //存储数据
+
 
                 }
                 else
@@ -138,6 +159,7 @@ namespace test
         {
             if (openFileDialog1.ShowDialog() == DialogResult.OK)
             {
+                
                 this.filepath.Text = "";
                 this.filepath.Text = openFileDialog1.FileName;
             }
@@ -190,19 +212,29 @@ namespace test
         {
             try
             {
+                //oracle
                 oracleHelper = new OracleHelper("192.168.5.105", "1521","orcl","C##zbl2","zbl2#DB365");
                 accessHelper = new AccessHelper(this.filepath.Text, "CSKY");
                 timer.Enabled = false;
-                //ServiceReference1.ToZDCJWebServiceClient K = new ServiceReference1.ToZDCJWebServiceClient();
-                //Console.WriteLine(K.getMaxCollectdateByEquipmentname("Cal01"));
+                //接口对接
+                ServiceReference1.ToZDCJWebServiceClient K = new ServiceReference1.ToZDCJWebServiceClient();
+
+                //解析json
+                string jsonData =  K.getMaxCollectdateByEquipmentname("Cal01");
+                JavaScriptSerializer serializer = new JavaScriptSerializer();
+                Dictionary<string, object> json = (Dictionary<string, object>)serializer.DeserializeObject(jsonData);
+                DateTime MaxTime = Convert.ToDateTime(json.ElementAt(json.Count-1).Value);
+
                 DataTable dt = new DataTable();
 
                 string sqlString = string.Format(@"SELECT t.Number, t.Mingchen,t.Testtime,t.Qgrad,t.Qgrd,t.Qb FROM win5emdb t 
-                                        WHERE t.testtime > #2023/5/22 4:50:46# ORDER BY t.testtime DESC ");
+                                        WHERE t.testtime > #{0}# ORDER BY t.testtime DESC ", MaxTime);
                 dt = accessHelper.Query(sqlString);
 
                 if (dt.Rows.Count < 1)
-                    return;
+                {
+                    return ;
+                }
                 else
                 {
                     foreach (DataRow dr in dt.Rows)
@@ -211,7 +243,8 @@ namespace test
                         AddLstMessage("存储的数据为：" + str);
                     }
                 }
-
+                if (true)
+                {
                 //Console.Write("Number" + "\t");
                 //Console.Write("Mingchen" + "\t");
                 //Console.Write("Testtime" + "\t");
@@ -227,15 +260,17 @@ namespace test
                 //    Console.Write(dt.Rows[i]["Qgrd"].ToString() + "\t");
                 //    Console.WriteLine(dt.Rows[i]["Qb"].ToString());
                 //}
+                }
+                
 
                 List<string> sqlStringList = new List<string>();
                 for (int i = 0; i < dt.Rows.Count; i++)
                 {
                     for (int j = 0; j < dt.Columns.Count; j++)
                     {
-                        string equipmentname = "Calo1";
+                        string equipmentname = ConfigModel.equipmentname;
                         //TESTNO - Number
-                        string testno = dt.Rows[0]["Number"].ToString();
+                        string testno = dt.Rows[i]["Number"].ToString();
                         string documentno = dt.Rows[i]["MingChen"].ToString();
                         string itemab = dt.Columns[j].ColumnName;
 
@@ -286,13 +321,52 @@ oldcollectdate);
                         sqlStringList.Add(sqlString);
                         string str = documentno + "," + collectdate + "," + itemab + "," + itemvalue;
                         AddLstMessage("准备转储数据:" + str);
+
                         //writeLog.WriteMsg("准备转储数据:" + str);
+
+                        Console.Write("equipment" + "\t");
+                        Console.Write("documentno" + "\t");
+                        Console.Write("itemab" + "\t");
+                        Console.Write("itemvalue" + "\t");
+                        Console.WriteLine("collectdate" + "\t");
+                        //Console.WriteLine("Qb");
+                       
+                        Console.Write(equipmentname + "\t");
+                        Console.Write(documentno + "\t");
+                        Console.Write(itemab + "\t");
+                        Console.Write(itemvalue + "\t");
+                        Console.WriteLine(collectdate + "\t");
+                        
+
+                        //try
+                        //{
+                        //    string result = K.saveZlItemvalueCollection(equipmentname, documentno, itemab, itemvalue, collectdate);
+                        //    Dictionary<string, object> res = (Dictionary<string, object>)serializer.DeserializeObject(result);
+                        //    string R = res.ElementAt(0).Value.ToString();
+                        //    if (R.Equals("Y"))
+                        //    {
+                        //        AddLstMessage("存储成功！");
+                        //    }
+                        //    else
+                        //    {
+                        //        AddLstMessage("存储失败！");
+                        //    }
+
+
+                        //}
+                        //catch(Exception ex)
+                        //{
+                        //    AddLstMessage("接口异常，存储失败：" + ex.Message);
+                        //}
+
                     }
-                }   
+                }
+                AddLstMessage("转储" + Convert.ToString(dt.Rows.Count) + "条记录");
                 int iTemp = oracleHelper.ExecuteSqlTran(sqlStringList);
                 if (iTemp >= 0)
                 {
                     AddLstMessage("转储" + Convert.ToString(iTemp) + "条记录");
+
                 }                 
             }
             catch (Exception ex)
@@ -330,5 +404,17 @@ oldcollectdate);
             //this.richTextBox1.AppendText(DateTime.Now.ToString() + "---" + str + "\n");
             //this.richTextBox1.ScrollToCaret(); 
         }
+
+        private void KCIVWriteXS_Click(object sender, EventArgs e)
+        {
+            var frm = new KCIVWriteXS();
+            frm.StartPosition = FormStartPosition.CenterParent;
+            if (DialogResult.OK == frm.ShowDialog())
+            {
+                toolStripStatusLabelFactor.Text = "当前A筒系数：" + ConfigModel.WriteXS_A.ToString() + "   当前B筒系数：" + ConfigModel.WriteXS_B.ToString();
+            }
+        }
+
+        
     }
 }
